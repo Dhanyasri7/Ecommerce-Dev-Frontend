@@ -25,19 +25,19 @@ function Navbar() {
   }, [location]);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
       <div className="container-fluid px-4">
 
         {/* Brand */}
         <span
-          className="navbar-brand fw-bold"
-          style={{ cursor: "pointer" }}
+          className="navbar-brand fw-bold fs-5"
+          role="button"
           onClick={() => navigate("/dashboard")}
         >
           🛒 MyStore
         </span>
 
-        {/* Toggle for mobile */}
+        {/* Mobile Toggle */}
         <button
           className="navbar-toggler"
           type="button"
@@ -47,18 +47,20 @@ function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Collapsible Content */}
+        {/* Navbar Content */}
         <div className="collapse navbar-collapse" id="navbarContent">
 
-          {/* Left Navigation Links */}
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+          {/* Left Links */}
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
 
             <li className="nav-item">
               <span
-                className={`nav-link ${
-                  location.pathname === "/dashboard" ? "fw-bold" : ""
+                className={`nav-link px-3 ${
+                  location.pathname === "/dashboard"
+                    ? "fw-bold text-dark"
+                    : "text-muted"
                 }`}
-                style={{ cursor: "pointer" }}
+                role="button"
                 onClick={() => navigate("/dashboard")}
               >
                 Home
@@ -67,10 +69,12 @@ function Navbar() {
 
             <li className="nav-item">
               <span
-                className={`nav-link ${
-                  location.pathname === "/products" ? "fw-bold" : ""
+                className={`nav-link px-3 ${
+                  location.pathname === "/products"
+                    ? "fw-bold text-dark"
+                    : "text-muted"
                 }`}
-                style={{ cursor: "pointer" }}
+                role="button"
                 onClick={() => navigate("/products")}
               >
                 All Products
@@ -79,20 +83,24 @@ function Navbar() {
 
           </ul>
 
-          {/* Search */}
-          <form className="d-flex me-3" onSubmit={handleSearch}>
+          {/* Search Bar */}
+          <form
+            className="d-flex align-items-center me-lg-3 my-3 my-lg-0"
+            onSubmit={handleSearch}
+          >
             <input
-              className="form-control"
+              className="form-control form-control-sm rounded-pill px-3"
               type="search"
               placeholder="Search products..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              style={{ minWidth: "220px" }}
             />
           </form>
 
-          {/* Logout */}
+          {/* Logout Button */}
           <button
-            className="btn btn-outline-dark btn-sm"
+            className="btn btn-dark btn-sm rounded-pill px-3"
             onClick={handleLogout}
           >
             Logout

@@ -10,7 +10,7 @@ function ProtectedRoute({ children }) {
     const interval = setInterval(() => {
       const token = localStorage.getItem("token");
       setIsAuthenticated(!!token);
-    }, 500); // checks every 0.5 second
+    }, 500); 
 
     return () => clearInterval(interval);
   }, []);

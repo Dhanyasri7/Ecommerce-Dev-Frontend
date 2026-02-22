@@ -11,6 +11,8 @@ function SearchPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (query) {
@@ -20,13 +22,18 @@ function SearchPage() {
 
   const fetchResults = async () => {
     try {
+      setLoading(true);
       const res = await api.get(
         `/search?q=${query}&page=${page}&limit=${limit}`
       );
+
       setProducts(res.data.products);
       setTotalPages(res.data.totalPages);
+      setTotalResults(res.data.total);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,30 +64,49 @@ function SearchPage() {
     <>
       <Navbar />
 
-      <div className="container mt-5 pt-4">
+      <div className="container mt-5 pt-5">
 
-        <h4 className="mb-4">
-          Search Results for "<span className="text-muted">{query}</span>"
-        </h4>
+        {/* Header */}
+        <div className="mb-4">
+          <h4 className="fw-bold">
+            Search Results
+          </h4>
+          <p className="text-muted mb-0">
+            Showing results for "<span className="fw-semibold">{query}</span>" 
+            {totalResults > 0 && ` • ${totalResults} found`}
+          </p>
+        </div>
 
-        {products.length === 0 ? (
-          <div className="text-center mt-4">
-            <p className="text-muted">No products found.</p>
+        {/* Loading */}
+        {loading ? (
+          <div className="d-flex justify-content-center my-5">
+            <div className="spinner-border text-dark" role="status" />
           </div>
+        ) : products.length === 0 ? (
+
+          /* Empty State */
+          <div className="text-center my-5">
+            <h6 className="fw-semibold">No products found</h6>
+            <p className="text-muted">
+              Try adjusting your search terms.
+            </p>
+          </div>
+
         ) : (
           <>
-            <div className="row">
+            {/* Product Grid */}
+            <div className="row g-4">
               {products.map((p) => (
                 <div
-                  key={p.proid}
-                  className="col-lg-3 col-md-4 col-sm-6 mb-4"
+                  key={p.id}
+                  className="col-lg-3 col-md-4 col-sm-6"
                 >
-                  <div className="card h-100 shadow-sm">
+                  <div className="card h-100 border-0 shadow-sm rounded-4">
 
                     {p.image && (
                       <img
                         src={p.image}
-                        className="card-img-top"
+                        className="card-img-top rounded-top-4"
                         alt={p.proname}
                         style={{
                           height: "200px",
@@ -92,28 +118,28 @@ function SearchPage() {
                     <div className="card-body d-flex flex-column">
 
                       <h6
-                        className="card-title"
+                        className="fw-semibold mb-2"
                         dangerouslySetInnerHTML={{
                           __html: p.proname
                         }}
                       />
 
                       <p
-                        className="card-text small text-muted"
+                        className="small text-muted mb-3"
                         dangerouslySetInnerHTML={{
                           __html: p.description
                         }}
                       />
 
-                      <div className="mt-auto">
-                        <p className="fw-bold mb-1">
-                          ₹{p.price}
-                        </p>
+                      <div className="mt-auto d-flex justify-content-between align-items-center">
+                        <span className="fw-bold">
+                          ₹ {p.price}
+                        </span>
 
                         {p.score && (
-                          <small className="text-muted">
-                            Score: {p.score.toFixed(2)}
-                          </small>
+                          <span className="badge bg-light text-dark border">
+                            {p.score.toFixed(1)}
+                          </span>
                         )}
                       </div>
 
@@ -124,9 +150,9 @@ function SearchPage() {
             </div>
 
             {/* Pagination */}
-            <div className="d-flex justify-content-center mt-4">
+            <div className="d-flex justify-content-center mt-5">
               <nav>
-                <ul className="pagination">
+                <ul className="pagination pagination-sm">
 
                   <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
                     <button

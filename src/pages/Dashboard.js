@@ -6,22 +6,24 @@ import { jwtDecode } from "jwt-decode";
 
 function Dashboard() {
   const [categories, setCategories] = useState([]);
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(6);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await api.get(
-        `/categories?page=${page}&limit=${limit}`
-      );
+      setLoading(true);
+      const res = await api.get(`/categories?page=${page}&limit=${limit}`);
       setCategories(res.data.categories);
       setTotalPages(res.data.totalPages);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   }, [page, limit]);
 
@@ -31,7 +33,7 @@ function Dashboard() {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setEmail(decoded.email);
+        setName(decoded.name);
         fetchCategories();
       } catch (err) {
         localStorage.removeItem("token");
@@ -75,85 +77,110 @@ function Dashboard() {
     <>
       <Navbar />
 
-      <div className="container mt-5 pt-4">
+      <div className="container mt-5 pt-5">
 
-        <div className="mb-4">
-          <h3 className="fw-semibold">Welcome {email}</h3>
-          <p className="text-muted">Select a category</p>
+        {/* Hero Section */}
+        <div className="bg-light p-4 p-md-5 rounded-4 shadow-sm mb-5">
+          <h3 className="fw-bold mb-2">
+            Welcome back, {name} 👋
+          </h3>
+          <p className="text-muted mb-0">
+            Browse categories and discover amazing products.
+          </p>
         </div>
 
-        {/* Category Grid */}
-        <div className="row">
-          {categories.map((cat) => (
-            <div
-              key={cat.catid}
-              className="col-lg-3 col-md-4 col-sm-6 mb-4"
-            >
-              <div
-                className="card h-100 shadow-sm"
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/category/${cat.catid}`)}
-              >
-                <div className="card-body">
-                  <h6 className="card-title">
-                    {cat.catname}
-                  </h6>
-                  <p className="card-text small text-muted">
-                    {cat.description}
-                  </p>
+        {/* Loading Spinner */}
+        {loading ? (
+          <div className="d-flex justify-content-center my-5">
+            <div className="spinner-border text-dark" role="status" />
+          </div>
+        ) : (
+          <>
+            {/* Category Grid */}
+            <div className="row g-4">
+              {categories.map((cat) => (
+                <div
+                  key={cat.catid}
+                  className="col-lg-3 col-md-4 col-sm-6"
+                >
+                  <div
+                    className="card h-100 border-0 shadow-sm rounded-4 text-center"
+                    role="button"
+                    onClick={() => navigate(`/category/${cat.catid}`)}
+                  >
+                    <div className="card-body d-flex flex-column justify-content-between">
+
+                      <div>
+                        <h6 className="fw-semibold mb-2">
+                          {cat.catname}
+                        </h6>
+                        <p className="small text-muted">
+                          {cat.description}
+                        </p>
+                      </div>
+
+                      <div className="mt-3">
+                        <span className="badge bg-dark rounded-pill px-3 py-2">
+                          Explore
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="d-flex justify-content-center mt-5">
+              <nav>
+                <ul className="pagination pagination-sm">
+
+                  <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => setPage(page - 1)}
+                    >
+                      &laquo;
+                    </button>
+                  </li>
+
+                  {renderPageNumbers()}
+
+                  <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => setPage(page + 1)}
+                    >
+                      &raquo;
+                    </button>
+                  </li>
+
+                </ul>
+              </nav>
+            </div>
+
+            {/* Limit Dropdown */}
+            <div className="d-flex justify-content-center mt-3">
+              <div className="d-flex align-items-center gap-2">
+                <span className="small text-muted">
+                  Categories per page:
+                </span>
+                <select
+                  className="form-select form-select-sm w-auto"
+                  value={limit}
+                  onChange={handleLimitChange}
+                >
+                  <option value={4}>4</option>
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                  <option value={12}>12</option>
+                </select>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Pagination */}
-        <div className="d-flex justify-content-center mt-4">
-          <nav>
-            <ul className="pagination">
-
-              <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(page - 1)}
-                >
-                  &laquo;
-                </button>
-              </li>
-
-              {renderPageNumbers()}
-
-              <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(page + 1)}
-                >
-                  &raquo;
-                </button>
-              </li>
-
-            </ul>
-          </nav>
-        </div>
-
-        {/* Limit Dropdown */}
-        <div className="d-flex justify-content-center mt-3">
-          <div className="d-flex align-items-center gap-2">
-            <span className="small">Categories per page:</span>
-            <select
-              className="form-select form-select-sm"
-              style={{ width: "90px" }}
-              value={limit}
-              onChange={handleLimitChange}
-            >
-              <option value={4}>4</option>
-              <option value={6}>6</option>
-              <option value={8}>8</option>
-              <option value={12}>12</option>
-            </select>
-          </div>
-        </div>
-
+          </>
+        )}
       </div>
     </>
   );

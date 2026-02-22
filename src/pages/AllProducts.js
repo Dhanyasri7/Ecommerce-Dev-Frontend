@@ -7,6 +7,7 @@ function AllProducts() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(12);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchProducts();
@@ -14,13 +15,14 @@ function AllProducts() {
 
   const fetchProducts = async () => {
     try {
-      const res = await api.get(
-        `/products?page=${page}&limit=${limit}`
-      );
+      setLoading(true);
+      const res = await api.get(`/products?page=${page}&limit=${limit}`);
       setProducts(res.data.products);
       setTotalPages(res.data.totalPages);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,93 +59,131 @@ function AllProducts() {
     <>
       <Navbar />
 
-      <div className="container mt-5 pt-4">
+      <div className="container mt-5 pt-5">
 
-        <h3 className="mb-4">All Products</h3>
+        {/* Header Section */}
+        <div className="mb-4">
+          <h3 className="fw-bold">All Products</h3>
+          <p className="text-muted mb-0">
+            Browse all available products in our store.
+          </p>
+        </div>
 
-        {/* Product Grid */}
-        <div className="row">
-          {products.map((prod) => (
-            <div key={prod.proid} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-              <div className="card h-100 shadow-sm">
+        {/* Loading */}
+        {loading ? (
+          <div className="d-flex justify-content-center my-5">
+            <div className="spinner-border text-dark" role="status" />
+          </div>
+        ) : products.length > 0 ? (
 
-                {prod.image && (
-                  <img
-                    src={prod.image}
-                    className="card-img-top"
-                    alt={prod.proname}
-                    style={{ height: "200px", objectFit: "cover" }}
-                  />
-                )}
+          <>
+            {/* Product Grid */}
+            <div className="row g-4">
+              {products.map((prod) => (
+                <div
+                  key={prod.proid}
+                  className="col-lg-3 col-md-4 col-sm-6"
+                >
+                  <div className="card h-100 border-0 shadow-sm rounded-4">
 
-                <div className="card-body d-flex flex-column">
-                  <h6 className="card-title">
-                    {prod.proname}
-                  </h6>
+                    {prod.image && (
+                      <img
+                        src={prod.image}
+                        className="card-img-top rounded-top-4"
+                        alt={prod.proname}
+                        style={{
+                          height: "200px",
+                          objectFit: "cover",
+                        }}
+                      />
+                    )}
 
-                  <p className="card-text small text-muted">
-                    {prod.description}
-                  </p>
+                    <div className="card-body d-flex flex-column">
 
-                  <div className="mt-auto">
-                    <p className="fw-bold mb-0">
-                      ₹ {prod.price}
-                    </p>
+                      <h6 className="fw-semibold mb-2">
+                        {prod.proname}
+                      </h6>
+
+                      <p className="small text-muted mb-3">
+                        {prod.description}
+                      </p>
+
+                      <div className="mt-auto d-flex justify-content-between align-items-center">
+                        <span className="fw-bold fs-6">
+                          ₹ {prod.price}
+                        </span>
+
+                        <button className="btn btn-sm btn-dark rounded-pill px-3">
+                          View
+                        </button>
+                      </div>
+
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
 
+            {/* Pagination */}
+            <div className="d-flex justify-content-center mt-5">
+              <nav>
+                <ul className="pagination pagination-sm">
+
+                  <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => setPage(page - 1)}
+                    >
+                      &laquo;
+                    </button>
+                  </li>
+
+                  {renderPageNumbers()}
+
+                  <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => setPage(page + 1)}
+                    >
+                      &raquo;
+                    </button>
+                  </li>
+
+                </ul>
+              </nav>
+            </div>
+
+            {/* Limit Selector */}
+            <div className="d-flex justify-content-center mt-3">
+              <div className="d-flex align-items-center gap-2">
+                <span className="small text-muted">
+                  Products per page:
+                </span>
+                <select
+                  className="form-select form-select-sm w-auto"
+                  value={limit}
+                  onChange={handleLimitChange}
+                >
+                  <option value={4}>4</option>
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                  <option value={12}>12</option>
+                </select>
               </div>
             </div>
-          ))}
-        </div>
+          </>
 
-        {/* Pagination */}
-        <div className="d-flex justify-content-center mt-4">
-          <nav>
-            <ul className="pagination">
+        ) : (
 
-              <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(page - 1)}
-                >
-                  &laquo;
-                </button>
-              </li>
-
-              {renderPageNumbers()}
-
-              <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(page + 1)}
-                >
-                  &raquo;
-                </button>
-              </li>
-
-            </ul>
-          </nav>
-        </div>
-
-        {/* Limit Dropdown */}
-        <div className="d-flex justify-content-center mt-3">
-          <div className="d-flex align-items-center gap-2">
-            <span className="small">Products per page:</span>
-            <select
-              className="form-select form-select-sm"
-              style={{ width: "90px" }}
-              value={limit}
-              onChange={handleLimitChange}
-            >
-              <option value={4}>4</option>
-              <option value={6}>6</option>
-              <option value={8}>8</option>
-              <option value={12}>12</option>
-            </select>
+          /* Empty State */
+          <div className="text-center my-5">
+            <h6 className="fw-semibold">No products found</h6>
+            <p className="text-muted">
+              Please check back later.
+            </p>
           </div>
-        </div>
 
+        )}
       </div>
     </>
   );

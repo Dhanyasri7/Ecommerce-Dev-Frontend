@@ -82,7 +82,7 @@ function Dashboard() {
         {/* Hero Section */}
         <div className="bg-light p-4 p-md-5 rounded-4 shadow-sm mb-5">
           <h3 className="fw-bold mb-2">
-            Welcome back, {name} 👋
+            Welcome, {name} 👋
           </h3>
           <p className="text-muted mb-0">
             Browse categories and discover amazing products.

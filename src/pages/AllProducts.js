@@ -113,9 +113,7 @@ function AllProducts() {
                           ₹ {prod.price}
                         </span>
 
-                        <button className="btn btn-sm btn-dark rounded-pill px-3">
-                          View
-                        </button>
+                        
                       </div>
 
                     </div>
